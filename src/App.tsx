@@ -82,6 +82,7 @@ type Review = {
   fromId: string
   rating: number
   text: string
+  date: string
 }
 
 type AppState = {
@@ -577,37 +578,85 @@ const reviews: Review[] = [
     id: 'r1',
     fromId: 'linda',
     rating: 5,
+    date: '24 May 2026',
     text: 'Amanda was very polite and responsive, lent me her hand drill. Good experience!',
   },
   {
     id: 'r2',
     fromId: 'john',
     rating: 5,
+    date: '22 May 2026',
     text: 'Clear pickup instructions and everything was ready on time. Would borrow again.',
   },
   {
     id: 'r3',
     fromId: 'anna',
     rating: 5,
+    date: '20 May 2026',
     text: 'Amanda helped me sort out a shelf quickly and left the space tidy.',
   },
   {
     id: 'r4',
     fromId: 'sara',
     rating: 4,
+    date: '18 May 2026',
     text: 'Friendly, fast replies, and very careful with shared items.',
   },
   {
     id: 'r5',
     fromId: 'tom',
     rating: 5,
+    date: '15 May 2026',
     text: 'Smooth handoff and returned the item exactly when promised.',
   },
   {
     id: 'r6',
     fromId: 'priya',
     rating: 5,
+    date: '11 May 2026',
     text: 'A trustworthy neighbor. The chat history made the whole exchange simple.',
+  },
+  {
+    id: 'r7',
+    fromId: 'noah',
+    rating: 5,
+    date: '8 May 2026',
+    text: 'Payment hold and return confirmation were easy to understand.',
+  },
+  {
+    id: 'r8',
+    fromId: 'eva',
+    rating: 4,
+    date: '5 May 2026',
+    text: 'Good communication and flexible timing when I needed to shift pickup.',
+  },
+  {
+    id: 'r9',
+    fromId: 'mike',
+    rating: 5,
+    date: '1 May 2026',
+    text: 'Amanda offered a fair trade and followed up after the exchange.',
+  },
+  {
+    id: 'r10',
+    fromId: 'sara',
+    rating: 5,
+    date: '28 Apr 2026',
+    text: 'The item details were accurate, with helpful pickup notes.',
+  },
+  {
+    id: 'r11',
+    fromId: 'anna',
+    rating: 5,
+    date: '24 Apr 2026',
+    text: 'Kind, practical, and very responsive in chat.',
+  },
+  {
+    id: 'r12',
+    fromId: 'tom',
+    rating: 4,
+    date: '20 Apr 2026',
+    text: 'Smooth exchange overall. The dated logs made it easy to track.',
   },
 ]
 
@@ -1164,7 +1213,7 @@ function ListingDetailSheet({
         <div className="detail-actions">
           <button onClick={onFavorite}>{favorite ? 'Saved' : 'Save'}</button>
           <button onClick={onChat}>Chat</button>
-          <button className="primary-action" onClick={onRequest}>
+          <button className={`primary-action ${listing.status === 'booked' ? 'danger-action' : ''}`} onClick={onRequest}>
             {listing.status === 'booked' ? 'Withdraw request' : listing.kind === 'request' ? 'Offer help' : paid ? 'Continue to pay' : 'Request'}
           </button>
         </div>
@@ -1547,32 +1596,52 @@ function ProfileScreen({ listings, favorites }: { listings: Listing[]; favorites
   const amanda = getNeighbor('amanda')
   const myListings = listings.filter((listing) => listing.ownerId === 'amanda')
   type ProfilePanelId = 'reviews' | 'deals' | 'saved' | 'lent' | 'borrowed' | 'posts' | 'safe' | 'frugal'
+  type ProfileRow = { id: string; title: string; person: string; detail: string; date: string; status: string; logs: string[] }
   const [panel, setPanel] = useState<ProfilePanelId>('lent')
-  const borrowedFromMe = [
-    { title: 'DeWalt hand drill', person: 'John B.', detail: 'Returned yesterday - 5.0 review' },
-    { title: 'Folding garden ladder', person: 'Linda T.', detail: 'Booked for Thursday - pickup 18:30' },
-    { title: 'Tool bit set', person: 'Anna', detail: 'Pending confirmation - free lend' },
-    { title: 'Stand mixer for baking', person: 'Priya S.', detail: 'Booked Saturday - free lend' },
-    { title: 'Cargo bike for errands', person: 'Noah P.', detail: 'Completed Tuesday - paid hold released' },
-    { title: 'Pressure washer', person: 'Tom R.', detail: 'Reserved tomorrow - 4 EUR/h' },
+  const borrowedFromMe: ProfileRow[] = [
+    { id: 'lent-drill', title: 'DeWalt hand drill', person: 'John B.', date: '24 May 2026', status: 'Returned', detail: 'Returned yesterday - 5.0 review', logs: ['Request accepted at 09:12', 'Pickup confirmed at Elm street 19', 'Returned clean with all drill bits', 'Review received: 5.0'] },
+    { id: 'lent-ladder', title: 'Folding garden ladder', person: 'Linda T.', date: '23 May 2026', status: 'Booked', detail: 'Booked for Thursday - pickup 18:30', logs: ['Linda requested a weekend borrow', 'Pickup window set for 18:30', 'Reminder scheduled for Thursday'] },
+    { id: 'lent-bits', title: 'Tool bit set', person: 'Anna', date: '22 May 2026', status: 'Pending', detail: 'Pending confirmation - free lend', logs: ['Anna asked for brick and wood bits', 'Awaiting final pickup time', 'No payment needed'] },
+    { id: 'lent-mixer', title: 'Stand mixer for baking', person: 'Priya S.', date: '19 May 2026', status: 'Booked', detail: 'Booked Saturday - free lend', logs: ['Priya saved the post', 'Pickup confirmed for Saturday morning', 'Return expected Sunday evening'] },
+    { id: 'lent-cargo', title: 'Cargo bike for errands', person: 'Noah P.', date: '17 May 2026', status: 'Completed', detail: 'Completed Tuesday - paid hold released', logs: ['Payment hold authorized', 'Bike returned charged', 'Hold released after handoff confirmation'] },
+    { id: 'lent-washer', title: 'Pressure washer', person: 'Tom R.', date: '15 May 2026', status: 'Reserved', detail: 'Reserved tomorrow - 4 EUR/h', logs: ['Tom requested a one-hour slot', 'Safety note sent in chat', 'Deposit pending pickup'] },
+    { id: 'lent-chair', title: 'Wooden kids chair', person: 'Sara K.', date: '12 May 2026', status: 'Returned', detail: 'Returned after birthday party - free', logs: ['Borrowed for weekend guests', 'Returned with thank-you note', 'Marked complete'] },
+    { id: 'lent-cot', title: 'Baby travel cot', person: 'Eva M.', date: '9 May 2026', status: 'Completed', detail: 'Weekend lend - 4.8 review', logs: ['Sheet included at pickup', 'Returned Monday morning', 'Review received: 4.8'] },
   ]
-  const iBorrowed = [
-    { title: 'Electric grill', person: 'Mike', detail: 'Today 19:00 - 21:30 - trade plant care' },
-    { title: 'Kids party chair set', person: 'Linda T.', detail: 'This weekend - free' },
-    { title: 'Baby travel cot', person: 'Priya S.', detail: 'Weekend pickup - free' },
-    { title: 'Carpet spot cleaner', person: 'Eva M.', detail: 'Tomorrow - 6 EUR/day' },
-    { title: 'Cordless hedge trimmer', person: 'John B.', detail: 'Saturday - 5 EUR/h' },
+  const iBorrowed: ProfileRow[] = [
+    { id: 'borrow-grill', title: 'Electric grill', person: 'Mike', date: '25 May 2026', status: 'Active today', detail: 'Today 19:00 - 21:30 - trade plant care', logs: ['Mike approved the request', 'Pickup planned for 19:00', 'Return window agreed for 21:30'] },
+    { id: 'borrow-chairs', title: 'Kids party chair set', person: 'Linda T.', date: '24 May 2026', status: 'Booked', detail: 'This weekend - free', logs: ['Saved from Kids category', 'Pickup instructions received', 'Return after Sunday lunch'] },
+    { id: 'borrow-cot', title: 'Baby travel cot', person: 'Priya S.', date: '20 May 2026', status: 'Completed', detail: 'Weekend pickup - free', logs: ['Picked up Friday', 'Used for family visit', 'Returned Sunday evening'] },
+    { id: 'borrow-cleaner', title: 'Carpet spot cleaner', person: 'Eva M.', date: '18 May 2026', status: 'Reserved', detail: 'Tomorrow - 6 EUR/day', logs: ['Demo payment hold ready', 'Eva will include cleaning solution', 'Pickup location confirmed'] },
+    { id: 'borrow-trimmer', title: 'Cordless hedge trimmer', person: 'John B.', date: '16 May 2026', status: 'Completed', detail: 'Saturday - 5 EUR/h', logs: ['Safety gloves included', 'Returned with battery charged', 'Payment hold released'] },
+    { id: 'borrow-table', title: 'Folding table for guests', person: 'Sara K.', date: '12 May 2026', status: 'Returned', detail: 'Friday to Sunday - free', logs: ['Borrowed for dinner guests', 'Returned folded and wiped down', 'Sara left a 5.0 review'] },
+    { id: 'borrow-bike', title: 'Cargo bike for errands', person: 'Noah P.', date: '7 May 2026', status: 'Completed', detail: 'One-hour grocery trip - 7 EUR/h', logs: ['Payment hold authorized', 'Route shared in chat', 'Returned before deadline'] },
+    { id: 'borrow-ladder', title: 'Garden ladder', person: 'John B.', date: '2 May 2026', status: 'Returned', detail: 'Balcony lights - free', logs: ['Picked up after work', 'Used for balcony lights', 'Returned same evening'] },
   ]
-  const panelText: Record<ProfilePanelId, { title: string; rows: Array<{ title: string; person: string; detail: string }> }> = {
-    reviews: { title: 'Reviews', rows: reviews.map((review) => ({ title: `${stars(review.rating)} ${getNeighbor(review.fromId).name}`, person: 'Recent feedback', detail: review.text })) },
-    deals: { title: 'Completed deals', rows: borrowedFromMe.concat(iBorrowed).slice(0, 4) },
-    saved: { title: 'Saved posts', rows: listings.filter((listing) => favorites.includes(listing.id)).map((listing) => ({ title: listing.title, person: getNeighbor(listing.ownerId).name, detail: `${listing.price} - ${listing.schedule}` })) },
+  const savedRows: ProfileRow[] = listings
+    .filter((listing) => favorites.includes(listing.id))
+    .map((listing) => ({
+      id: `saved-${listing.id}`,
+      title: listing.title,
+      person: getNeighbor(listing.ownerId).name,
+      date: 'Saved in demo',
+      status: listing.status,
+      detail: `${listing.price} - ${listing.schedule}`,
+      logs: [`Saved from ${listing.category}`, `${listing.location} - ${listing.distance}`, listing.description],
+    }))
+  const dealRows = borrowedFromMe.concat(iBorrowed)
+  const panelText: Record<ProfilePanelId, { title: string; rows: ProfileRow[] }> = {
+    reviews: { title: 'Reviews', rows: reviews.map((review) => ({ id: review.id, title: `${stars(review.rating)} ${getNeighbor(review.fromId).name}`, person: 'Recent feedback', date: review.date, status: `${review.rating}.0 rating`, detail: review.text, logs: ['Exchange completed', 'Review submitted by neighbor', review.text] })) },
+    deals: { title: 'All exchange logs', rows: dealRows },
+    saved: { title: 'Saved posts', rows: savedRows },
     lent: { title: 'Borrowed from me', rows: borrowedFromMe },
     borrowed: { title: 'I borrowed', rows: iBorrowed },
-    posts: { title: 'My active posts', rows: myListings.map((listing) => ({ title: listing.title, person: listing.category, detail: `${listing.price} - ${listing.schedule}` })) },
-    safe: { title: 'Safe exchange badge', rows: [{ title: 'Verified identity', person: 'Safety', detail: 'Profile, location, and neighbor feedback have been checked for safer meetups.' }] },
-    frugal: { title: 'Frugal lifestyle badge', rows: [{ title: 'Resource saver', person: 'Community', detail: '15 successful reuse deals helped avoid buying duplicate household items.' }] },
+    posts: { title: 'My active posts', rows: myListings.map((listing) => ({ id: `post-${listing.id}`, title: listing.title, person: listing.category, date: listing.schedule, status: listing.status, detail: `${listing.price} - ${listing.location}`, logs: ['Published by Amanda White', `${listing.distance} from nearby neighbors`, listing.description] })) },
+    safe: { title: 'Safe exchange badge', rows: [{ id: 'safe-identity', title: 'Verified identity', person: 'Safety', date: 'Updated 25 May 2026', status: 'Verified', detail: 'Profile, location, and neighbor feedback have been checked for safer meetups.', logs: ['Phone and profile confirmed', 'Meetup checklist enabled', 'Visible safety badge added to profile'] }] },
+    frugal: { title: 'Frugal lifestyle badge', rows: [{ id: 'frugal-resource', title: 'Resource saver', person: 'Community', date: 'May 2026', status: 'Active', detail: `${dealRows.length} successful reuse deals helped avoid buying duplicate household items.`, logs: ['Shared household items instead of buying duplicates', 'Completed free favors and paid holds', 'Badge updates as exchange history grows'] }] },
   }
+  const reviewCount = panelText.reviews.rows.length
+  const dealCount = dealRows.length
 
   return (
     <div className="profile-screen">
@@ -1588,16 +1657,16 @@ function ProfileScreen({ listings, favorites }: { listings: Listing[]; favorites
         </div>
       </div>
       <div className="stats-strip">
-        <button className={panel === 'reviews' ? 'active' : ''} onClick={() => setPanel('reviews')}>21 Reviews</button>
-        <button className={panel === 'deals' ? 'active' : ''} onClick={() => setPanel('deals')}>15 Deals</button>
+        <button className={panel === 'reviews' ? 'active' : ''} onClick={() => setPanel('reviews')}>{reviewCount} Reviews</button>
+        <button className={panel === 'deals' ? 'active' : ''} onClick={() => setPanel('deals')}>{dealCount} Deals</button>
         <button className={panel === 'saved' ? 'active' : ''} onClick={() => setPanel('saved')}>{favorites.length} Saved</button>
       </div>
       {['reviews', 'deals', 'saved', 'safe', 'frugal'].includes(panel) && <ProfileDetail data={panelText[panel]} />}
       <p className="bio">I want to help and share things that others do not have. I value living green and living sparingly.</p>
       <SectionTitle title="Borrowed and lent" onClick={() => setPanel('lent')} />
       <div className="history-list">
-        <button className={panel === 'lent' ? 'active' : ''} onClick={() => setPanel('lent')}>Borrowed from me (15)<ChevronRight size={20} /></button>
-        <button className={panel === 'borrowed' ? 'active' : ''} onClick={() => setPanel('borrowed')}>I borrowed (8)<ChevronRight size={20} /></button>
+        <button className={panel === 'lent' ? 'active' : ''} onClick={() => setPanel('lent')}>Borrowed from me ({borrowedFromMe.length})<ChevronRight size={20} /></button>
+        <button className={panel === 'borrowed' ? 'active' : ''} onClick={() => setPanel('borrowed')}>I borrowed ({iBorrowed.length})<ChevronRight size={20} /></button>
         <button className={panel === 'posts' ? 'active' : ''} onClick={() => setPanel('posts')}>My active posts ({myListings.length})<ChevronRight size={20} /></button>
       </div>
       {['lent', 'borrowed', 'posts'].includes(panel) && <ProfileDetail data={panelText[panel]} />}
@@ -1617,20 +1686,54 @@ function ProfileScreen({ listings, favorites }: { listings: Listing[]; favorites
   )
 }
 
-function ProfileDetail({ data }: { data: { title: string; rows: Array<{ title: string; person: string; detail: string }> } }) {
+function ProfileDetail({
+  data,
+}: {
+  data: { title: string; rows: Array<{ id: string; title: string; person: string; detail: string; date: string; status: string; logs: string[] }> }
+}) {
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [showAll, setShowAll] = useState(false)
+  const previewLimit = 4
+  const visibleRows = showAll ? data.rows : data.rows.slice(0, previewLimit)
+
   return (
     <div className="profile-detail">
-      <strong>{data.title}</strong>
+      <div className="profile-detail-head">
+        <strong>{data.title}</strong>
+        <span>{data.rows.length} total</span>
+      </div>
       {data.rows.length === 0 ? (
         <p>No items yet. Save a post or publish one to fill this section.</p>
       ) : (
-        data.rows.map((row) => (
-          <article key={`${row.title}-${row.detail}`}>
-            <span>{row.person}</span>
-            <b>{row.title}</b>
-            <p>{row.detail}</p>
-          </article>
-        ))
+        <>
+          {visibleRows.map((row) => {
+            const expanded = expandedId === row.id
+            return (
+              <button
+                key={row.id}
+                className={`profile-log ${expanded ? 'expanded' : ''}`}
+                onClick={() => setExpandedId(expanded ? null : row.id)}
+              >
+                <span>{row.person} - {row.date}</span>
+                <b>{row.title}</b>
+                <p>{row.detail}</p>
+                <small>{row.status}</small>
+                {expanded && (
+                  <ol>
+                    {row.logs.map((log) => (
+                      <li key={log}>{log}</li>
+                    ))}
+                  </ol>
+                )}
+              </button>
+            )
+          })}
+          {data.rows.length > previewLimit && (
+            <button className="show-more" onClick={() => setShowAll((value) => !value)}>
+              {showAll ? 'Show less' : `Show all ${data.rows.length}`}
+            </button>
+          )}
+        </>
       )}
     </div>
   )
@@ -1713,7 +1816,7 @@ function ListingCard({
   const owner = getNeighbor(listing.ownerId)
   return (
     <article
-      className={`listing-card ${compact ? 'compact' : ''}`}
+      className={`listing-card ${compact ? 'compact' : ''} ${listing.status === 'booked' ? 'booked' : ''}`}
       role="button"
       tabIndex={0}
       aria-label={`View details for ${listing.title}`}
@@ -1774,7 +1877,7 @@ function ListingCard({
           Chat
         </button>
         <button
-          className="primary-mini"
+          className={`primary-mini ${listing.status === 'booked' ? 'danger-action' : ''}`}
           onClick={(event) => {
             event.stopPropagation()
             onRequest()
