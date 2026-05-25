@@ -604,10 +604,10 @@ img {
 .listing-art {
   width: 86px;
   height: 86px;
-  display: grid;
-  place-items: center;
-  align-content: center;
-  justify-content: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
   overflow: hidden;
   padding: 10px;
@@ -620,6 +620,7 @@ img {
 }
 
 .listing-art > svg {
+  flex: 0 0 auto;
   color: rgba(255, 255, 255, 0.94);
   filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.15));
 }
@@ -627,6 +628,7 @@ img {
 .listing-art span {
   position: relative;
   z-index: 1;
+  max-width: 100%;
   padding: 5px 8px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.22);
@@ -634,11 +636,15 @@ img {
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 0;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .listing-art.small {
   width: 75px;
   height: 75px;
+  gap: 6px;
   border-radius: 16px;
 }
 
@@ -2027,18 +2033,18 @@ img {
   background: var(--card-soft);
 }
 
-.detail-hero strong,
-.detail-hero span {
+.detail-hero > div:not(.listing-art) > strong,
+.detail-hero > div:not(.listing-art) > span {
   display: block;
 }
 
-.detail-hero strong {
+.detail-hero > div:not(.listing-art) > strong {
   color: var(--ink);
   font-size: 21px;
   line-height: 1;
 }
 
-.detail-hero span {
+.detail-hero > div:not(.listing-art) > span {
   margin-top: 3px;
   color: var(--orange);
   font-size: 13px;

@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
-import type { FormEvent } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { Dispatch, FormEvent, SetStateAction } from 'react'
+import { App as CapacitorApp } from '@capacitor/app'
 import {
   ArrowLeft,
   Armchair,
@@ -37,6 +38,7 @@ type Category = 'Tools' | 'Everyday' | 'Kids' | 'Furniture' | 'Repair' | 'Caregi
 type ListingKind = 'lend' | 'rent' | 'request' | 'skill'
 type MessageAuthor = 'me' | 'them' | 'system'
 type PaymentMethod = 'visa' | 'mastercard' | 'google-pay' | 'apple-pay' | 'paypal'
+type ProfilePanelId = 'reviews' | 'deals' | 'saved' | 'active' | 'lent' | 'borrowed' | 'posts' | 'safe' | 'frugal'
 
 type Neighbor = {
   id: string
@@ -725,10 +727,12 @@ function App() {
   const [state, setState] = useState<AppState>(() => loadState())
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem('neighborrow:theme') === 'dark' ? 'dark' : 'light'))
   const [tab, setTab] = useState<Tab>('home')
+  const [, setTabHistory] = useState<Tab[]>([])
   const [activeCategory, setActiveCategory] = useState<Category | 'All'>('All')
   const [query, setQuery] = useState('')
   const [activeChatId, setActiveChatId] = useState('chat-anna')
   const [chatMode, setChatMode] = useState<'list' | 'thread'>('list')
+  const [profilePanel, setProfilePanel] = useState<ProfilePanelId | null>('active')
   const [messageDraft, setMessageDraft] = useState('')
   const [form, setForm] = useState<DraftListing>(emptyDraft)
   const [notice, setNotice] = useState<string | null>(null)
@@ -750,6 +754,82 @@ function App() {
     const timer = window.setTimeout(() => setNotice(null), 2600)
     return () => window.clearTimeout(timer)
   }, [notice])
+
+  const navigateTab = useCallback((nextTab: Tab, record = true) => {
+    setTab((currentTab) => {
+      if (currentTab === nextTab) return currentTab
+      if (record) {
+        setTabHistory((history) => [...history, currentTab].slice(-10))
+      }
+      return nextTab
+    })
+  }, [])
+
+  const handleBackAction = useCallback(() => {
+    if (checkoutListing) {
+      setCheckoutListing(null)
+      return true
+    }
+
+    if (detailListing) {
+      setDetailListing(null)
+      return true
+    }
+
+    if (tab === 'chats' && chatMode === 'thread') {
+      setChatMode('list')
+      return true
+    }
+
+    if (tab === 'profile' && profilePanel) {
+      setProfilePanel(null)
+      return true
+    }
+
+    if (tab === 'search' && (query || activeCategory !== 'All')) {
+      setQuery('')
+      setActiveCategory('All')
+      return true
+    }
+
+    if (tab !== 'home') {
+      setTabHistory((history) => {
+        const previousTab = history.at(-1) ?? 'home'
+        setTab(previousTab)
+        if (previousTab === 'chats') setChatMode('list')
+        return history.slice(0, -1)
+      })
+      return true
+    }
+
+    return false
+  }, [activeCategory, chatMode, checkoutListing, detailListing, profilePanel, query, tab])
+
+  useEffect(() => {
+    let cancelled = false
+    let removeListener: (() => void) | undefined
+    void CapacitorApp.addListener('backButton', ({ canGoBack }) => {
+      const handled = handleBackAction()
+      if (!handled && !canGoBack) {
+        void CapacitorApp.exitApp()
+      } else if (!handled && canGoBack) {
+        window.history.back()
+      }
+    }).then((listener) => {
+      if (cancelled) {
+        void listener.remove()
+        return
+      }
+      removeListener = () => {
+        void listener.remove()
+      }
+    }).catch(() => undefined)
+
+    return () => {
+      cancelled = true
+      removeListener?.()
+    }
+  }, [handleBackAction])
 
   const filteredListings = useMemo(() => {
     return state.listings.filter((listing) => {
@@ -796,7 +876,7 @@ function App() {
       setState((current) => ({ ...current, chats: [thread, ...current.chats] }))
       setActiveChatId(thread.id)
     }
-    setTab('chats')
+    navigateTab('chats')
     setChatMode('thread')
   }
 
@@ -947,7 +1027,7 @@ function App() {
     setForm(emptyDraft)
     setQuery('')
     setActiveCategory('All')
-    setTab('home')
+    navigateTab('home', false)
     setNotice('Your post is live')
   }
 
@@ -969,7 +1049,7 @@ function App() {
               onRequest={requestListing}
               onChat={openChat}
               onDetails={setDetailListing}
-              onBrowseSearch={() => setTab('search')}
+              onBrowseSearch={() => navigateTab('search')}
             />
           )}
 
@@ -1005,14 +1085,22 @@ function App() {
             />
           )}
 
-          {tab === 'profile' && <ProfileScreen listings={state.listings} favorites={state.favorites} onDetails={setDetailListing} />}
+          {tab === 'profile' && (
+            <ProfileScreen
+              listings={state.listings}
+              favorites={state.favorites}
+              panel={profilePanel}
+              setPanel={setProfilePanel}
+              onDetails={setDetailListing}
+            />
+          )}
         </div>
 
         <BottomNav
           active={tab}
           onChange={(nextTab) => {
             if (nextTab === 'chats') setChatMode('list')
-            setTab(nextTab)
+            navigateTab(nextTab)
           }}
           unread={state.chats.reduce((total, chat) => total + chat.unread, 0)}
         />
@@ -1651,16 +1739,18 @@ function ChatsScreen({
 function ProfileScreen({
   listings,
   favorites,
+  panel,
+  setPanel,
   onDetails,
 }: {
   listings: Listing[]
   favorites: string[]
+  panel: ProfilePanelId | null
+  setPanel: Dispatch<SetStateAction<ProfilePanelId | null>>
   onDetails: (listing: Listing) => void
 }) {
   const amanda = getNeighbor('amanda')
   const myListings = listings.filter((listing) => listing.ownerId === 'amanda')
-  type ProfilePanelId = 'reviews' | 'deals' | 'saved' | 'active' | 'lent' | 'borrowed' | 'posts' | 'safe' | 'frugal'
-  const [panel, setPanel] = useState<ProfilePanelId | null>('active')
   const borrowedFromMe: ProfileRow[] = [
     { id: 'lent-drill', title: 'DeWalt hand drill', person: 'John B.', date: '24 May 2026', status: 'Returned', detail: 'Returned yesterday - 5.0 review', logs: ['Request accepted at 09:12', 'Pickup confirmed at Elm street 19', 'Returned clean with all drill bits', 'Review received: 5.0'] },
     { id: 'lent-ladder', title: 'Folding garden ladder', person: 'Linda T.', date: '23 May 2026', status: 'Booked', detail: 'Booked for Thursday - pickup 18:30', logs: ['Linda requested a weekend borrow', 'Pickup window set for 18:30', 'Reminder scheduled for Thursday'] },
