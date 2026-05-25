@@ -326,10 +326,12 @@ function App() {
   const [activeCategory, setActiveCategory] = useState<Category | 'All'>('All')
   const [query, setQuery] = useState('')
   const [activeChatId, setActiveChatId] = useState('chat-anna')
+  const [chatMode, setChatMode] = useState<'list' | 'thread'>('list')
   const [messageDraft, setMessageDraft] = useState('')
   const [form, setForm] = useState<DraftListing>(emptyDraft)
   const [notice, setNotice] = useState<string | null>(null)
   const [checkoutListing, setCheckoutListing] = useState<Listing | null>(null)
+  const [detailListing, setDetailListing] = useState<Listing | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('google-pay')
 
   useEffect(() => {
@@ -368,6 +370,7 @@ function App() {
   }
 
   function openChat(listing: Listing) {
+    setDetailListing(null)
     const existing = state.chats.find((chat) => chat.neighborId === listing.ownerId && chat.listingId === listing.id)
     if (existing) {
       setActiveChatId(existing.id)
@@ -391,6 +394,7 @@ function App() {
       setActiveChatId(thread.id)
     }
     setTab('chats')
+    setChatMode('thread')
   }
 
   function openThread(chatId: string) {
@@ -429,6 +433,7 @@ function App() {
   }
 
   function requestListing(listing: Listing) {
+    setDetailListing(null)
     if (listing.status === 'booked') {
       openChat(listing)
       setNotice('Request already sent - chat opened')
@@ -539,6 +544,7 @@ function App() {
               onFavorite={toggleFavorite}
               onRequest={requestListing}
               onChat={openChat}
+              onDetails={setDetailListing}
               onBrowseSearch={() => setTab('search')}
             />
           )}
@@ -554,6 +560,7 @@ function App() {
               onFavorite={toggleFavorite}
               onRequest={requestListing}
               onChat={openChat}
+              onDetails={setDetailListing}
             />
           )}
 
@@ -566,6 +573,8 @@ function App() {
               activeListing={activeListing}
               draft={messageDraft}
               setDraft={setMessageDraft}
+              mode={chatMode}
+              setMode={setChatMode}
               openThread={openThread}
               startDirectChat={startDirectChat}
               sendMessage={sendMessage}
@@ -575,7 +584,14 @@ function App() {
           {tab === 'profile' && <ProfileScreen listings={state.listings} favorites={state.favorites} />}
         </div>
 
-        <BottomNav active={tab} onChange={setTab} unread={state.chats.reduce((total, chat) => total + chat.unread, 0)} />
+        <BottomNav
+          active={tab}
+          onChange={(nextTab) => {
+            if (nextTab === 'chats') setChatMode('list')
+            setTab(nextTab)
+          }}
+          unread={state.chats.reduce((total, chat) => total + chat.unread, 0)}
+        />
       </section>
       {checkoutListing && (
         <CheckoutSheet
@@ -584,6 +600,16 @@ function App() {
           setMethod={setPaymentMethod}
           onClose={() => setCheckoutListing(null)}
           onConfirm={completeCheckout}
+        />
+      )}
+      {detailListing && (
+        <ListingDetailSheet
+          listing={detailListing}
+          favorite={state.favorites.includes(detailListing.id)}
+          onClose={() => setDetailListing(null)}
+          onFavorite={() => toggleFavorite(detailListing.id)}
+          onChat={() => openChat(detailListing)}
+          onRequest={() => requestListing(detailListing)}
         />
       )}
       {notice && <div className="toast">{notice}</div>}
@@ -716,6 +742,74 @@ function CheckoutSheet({
   )
 }
 
+function ListingDetailSheet({
+  listing,
+  favorite,
+  onClose,
+  onFavorite,
+  onChat,
+  onRequest,
+}: {
+  listing: Listing
+  favorite: boolean
+  onClose: () => void
+  onFavorite: () => void
+  onChat: () => void
+  onRequest: () => void
+}) {
+  const owner = getNeighbor(listing.ownerId)
+  const paid = isPaidListing(listing)
+
+  return (
+    <div className="sheet-backdrop" role="dialog" aria-modal="true" aria-label={`${listing.title} details`}>
+      <section className="checkout-sheet detail-sheet">
+        <div className="sheet-head">
+          <div>
+            <span>{listing.kind === 'request' ? 'Neighbor request' : paid ? 'Protected exchange' : 'Community share'}</span>
+            <h2>{listing.title}</h2>
+          </div>
+          <button onClick={onClose} aria-label="Close listing details">
+            <X size={22} />
+          </button>
+        </div>
+
+        <div className="detail-hero">
+          <ListingArt listing={listing} />
+          <div>
+            <strong>{owner.name}</strong>
+            <span>{owner.verified ? 'Verified neighbor' : 'Community profile'} - {owner.rating.toFixed(1)} rating</span>
+            <p>{listing.description}</p>
+          </div>
+        </div>
+
+        <div className="detail-metrics" aria-label="Exchange summary">
+          <span><b>{listing.schedule}</b>Available window</span>
+          <span><b>{listing.distance}</b>Distance</span>
+          <span><b>{listing.price}</b>{paid ? 'Demo hold' : 'Cost'}</span>
+        </div>
+
+        <div className="detail-checklist">
+          <strong>Demo-ready exchange flow</strong>
+          <p>Confirm timing in chat, meet at the shared location, and close the request after pickup or help is complete.</p>
+          <div>
+            <span><ShieldCheck size={18} /> Identity checked</span>
+            <span><MessageCircle size={18} /> Local chat trail</span>
+            <span><MapPin size={18} /> {listing.location}</span>
+          </div>
+        </div>
+
+        <div className="detail-actions">
+          <button onClick={onFavorite}>{favorite ? 'Saved' : 'Save'}</button>
+          <button onClick={onChat}>Chat</button>
+          <button className="primary-action" onClick={onRequest}>
+            {listing.kind === 'request' ? 'Offer help' : listing.status === 'booked' ? 'Open request' : paid ? 'Continue to pay' : 'Request'}
+          </button>
+        </div>
+      </section>
+    </div>
+  )
+}
+
 function HomeScreen({
   listings,
   favorites,
@@ -726,14 +820,18 @@ function HomeScreen({
   onFavorite,
   onRequest,
   onChat,
+  onDetails,
   onBrowseSearch,
 }: ListingScreenProps) {
   const requests = listings.filter((listing) => listing.kind === 'request')
   const offers = listings.filter((listing) => listing.kind !== 'request')
+  const availableCount = offers.filter((listing) => listing.status === 'available').length
+  const favorCount = listings.filter((listing) => !isPaidListing(listing)).length
 
   return (
     <div className="screen-stack">
       <SearchBox value={query} onChange={setQuery} placeholder="What do you need help with?" />
+      <NeighborhoodPulse availableCount={availableCount} favorCount={favorCount} />
       <SectionTitle
         title="Categories"
         onClick={() => {
@@ -752,6 +850,7 @@ function HomeScreen({
             onFavorite={() => onFavorite(listing.id)}
             onRequest={() => onRequest(listing)}
             onChat={() => onChat(listing)}
+            onDetails={() => onDetails(listing)}
           />
         ))}
       </div>
@@ -769,7 +868,33 @@ type ListingScreenProps = {
   onFavorite: (listingId: string) => void
   onRequest: (listing: Listing) => void
   onChat: (listing: Listing) => void
+  onDetails: (listing: Listing) => void
   onBrowseSearch?: () => void
+}
+
+function NeighborhoodPulse({ availableCount, favorCount }: { availableCount: number; favorCount: number }) {
+  return (
+    <section className="pulse-panel" aria-label="Neighborhood activity">
+      <div>
+        <span>Elm Quarter is live</span>
+        <strong>{availableCount} shares ready today</strong>
+      </div>
+      <dl>
+        <div>
+          <dt>{favorCount}</dt>
+          <dd>Free favors</dd>
+        </div>
+        <div>
+          <dt>12m</dt>
+          <dd>Avg reply</dd>
+        </div>
+        <div>
+          <dt>98%</dt>
+          <dd>Safe handoffs</dd>
+        </div>
+      </dl>
+    </section>
+  )
 }
 
 function SearchScreen(props: ListingScreenProps) {
@@ -797,6 +922,7 @@ function SearchScreen(props: ListingScreenProps) {
             onFavorite={() => props.onFavorite(listing.id)}
             onRequest={() => props.onRequest(listing)}
             onChat={() => props.onChat(listing)}
+            onDetails={() => props.onDetails(listing)}
             compact
           />
         ))}
@@ -877,6 +1003,8 @@ function ChatsScreen({
   activeListing,
   draft,
   setDraft,
+  mode,
+  setMode,
   openThread,
   startDirectChat,
   sendMessage,
@@ -886,11 +1014,12 @@ function ChatsScreen({
   activeListing?: Listing
   draft: string
   setDraft: (value: string) => void
+  mode: 'list' | 'thread'
+  setMode: (mode: 'list' | 'thread') => void
   openThread: (id: string) => void
   startDirectChat: (neighborId: string) => string
   sendMessage: () => void
 }) {
-  const [mode, setMode] = useState<'list' | 'thread'>('list')
   const [chatFilter, setChatFilter] = useState<'all' | 'unread'>('all')
   const [chatQuery, setChatQuery] = useState('')
   const [composeOpen, setComposeOpen] = useState(false)
@@ -1188,6 +1317,7 @@ function ListingCard({
   onFavorite,
   onRequest,
   onChat,
+  onDetails,
   compact,
 }: {
   listing: Listing
@@ -1195,6 +1325,7 @@ function ListingCard({
   onFavorite: () => void
   onRequest: () => void
   onChat: () => void
+  onDetails: () => void
   compact?: boolean
 }) {
   const owner = getNeighbor(listing.ownerId)
@@ -1225,6 +1356,7 @@ function ListingCard({
       <div className="card-actions">
         <span className={`kind-pill ${listing.kind}`}>{listing.kind}</span>
         <span className="price">{listing.price}</span>
+        <button onClick={onDetails}>Details</button>
         <button onClick={onChat}>Chat</button>
         <button className="primary-mini" onClick={onRequest}>
           {listing.kind === 'request' ? 'Offer help' : listing.status === 'booked' ? 'Requested' : 'Request'}
