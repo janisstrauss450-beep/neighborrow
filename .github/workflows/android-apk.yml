@@ -8,6 +8,8 @@ on:
 jobs:
   build-debug-apk:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout
@@ -22,8 +24,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: microsoft
-          java-version: 17
+          distribution: temurin
+          java-version: 21
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
