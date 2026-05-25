@@ -144,6 +144,47 @@ const neighbors: Neighbor[] = [
     rating: 5,
     verified: true,
   },
+  {
+    id: 'sara',
+    name: 'Sara K.',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=180&q=80',
+    address: 'Cedar walk 6',
+    rating: 4.8,
+    verified: true,
+    online: true,
+  },
+  {
+    id: 'tom',
+    name: 'Tom R.',
+    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=180&q=80',
+    address: 'Pine avenue 11',
+    rating: 4.9,
+    verified: true,
+  },
+  {
+    id: 'eva',
+    name: 'Eva M.',
+    avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=180&q=80',
+    address: 'River road 3',
+    rating: 4.6,
+  },
+  {
+    id: 'noah',
+    name: 'Noah P.',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=180&q=80',
+    address: 'Willow yard 2',
+    rating: 4.7,
+    verified: true,
+  },
+  {
+    id: 'priya',
+    name: 'Priya S.',
+    avatar: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=180&q=80',
+    address: 'Market lane 17',
+    rating: 5,
+    verified: true,
+    online: true,
+  },
 ]
 
 const seedListings: Listing[] = [
@@ -225,6 +266,214 @@ const seedListings: Listing[] = [
     distance: '0.9 km',
     status: 'available',
   },
+  {
+    id: 'pressure-washer',
+    title: 'Compact pressure washer',
+    ownerId: 'tom',
+    category: 'Tools',
+    kind: 'rent',
+    description: 'Small patio washer with extension hose. Good for bikes, balconies, and garden tiles.',
+    location: 'Pine avenue 11',
+    price: '4 EUR/h',
+    schedule: 'Today after 16:00',
+    distance: '1.1 km',
+    status: 'available',
+  },
+  {
+    id: 'tool-bit-set',
+    title: 'Mixed drill bit set',
+    ownerId: 'sara',
+    category: 'Tools',
+    kind: 'lend',
+    description: 'Wood, brick, and metal bits in a labeled case. Please return the same evening.',
+    location: 'Cedar walk 6',
+    price: 'Free',
+    schedule: 'Available all week',
+    distance: '0.5 km',
+    status: 'available',
+  },
+  {
+    id: 'stand-mixer',
+    title: 'Stand mixer for baking',
+    ownerId: 'priya',
+    category: 'Everyday',
+    kind: 'lend',
+    description: 'Reliable mixer with dough hook and whisk. Perfect for birthday cakes or batch baking.',
+    location: 'Market lane 17',
+    price: 'Free',
+    schedule: 'Saturday morning',
+    distance: '1.2 km',
+    status: 'available',
+  },
+  {
+    id: 'carpet-cleaner',
+    title: 'Carpet spot cleaner',
+    ownerId: 'eva',
+    category: 'Everyday',
+    kind: 'rent',
+    description: 'Handheld cleaner for rugs, sofas, and small spills. Includes half a bottle of solution.',
+    location: 'River road 3',
+    price: '6 EUR/day',
+    schedule: 'Tomorrow',
+    distance: '1.4 km',
+    status: 'available',
+  },
+  {
+    id: 'baby-travel-cot',
+    title: 'Baby travel cot',
+    ownerId: 'priya',
+    category: 'Kids',
+    kind: 'lend',
+    description: 'Clean folding cot with fitted sheet, ideal for visiting family with a toddler.',
+    location: 'Market lane 17',
+    price: 'Free',
+    schedule: 'Weekend pickup',
+    distance: '1.2 km',
+    status: 'available',
+  },
+  {
+    id: 'lego-box',
+    title: 'Rainy-day Lego box',
+    ownerId: 'noah',
+    category: 'Kids',
+    kind: 'lend',
+    description: 'Mixed bricks and wheels for a quiet afternoon. Best for ages 5 and up.',
+    location: 'Willow yard 2',
+    price: 'Free',
+    schedule: 'Sunday afternoon',
+    distance: '0.8 km',
+    status: 'available',
+  },
+  {
+    id: 'folding-table',
+    title: 'Folding table for guests',
+    ownerId: 'sara',
+    category: 'Furniture',
+    kind: 'lend',
+    description: 'Light folding table that seats four. Easy to carry and fits in a hallway.',
+    location: 'Cedar walk 6',
+    price: 'Free',
+    schedule: 'Friday to Sunday',
+    distance: '0.5 km',
+    status: 'available',
+  },
+  {
+    id: 'office-chair',
+    title: 'Ergonomic office chair',
+    ownerId: 'tom',
+    category: 'Furniture',
+    kind: 'rent',
+    description: 'Adjustable chair for a temporary work-from-home setup or visiting student.',
+    location: 'Pine avenue 11',
+    price: '10 EUR/week',
+    schedule: 'Available Monday',
+    distance: '1.1 km',
+    status: 'available',
+  },
+  {
+    id: 'bike-tuneup',
+    title: 'Bike brake tune-up',
+    ownerId: 'noah',
+    category: 'Repair',
+    kind: 'skill',
+    description: 'I can adjust brake pads, tighten cables, and check tires in the courtyard.',
+    location: 'Willow yard 2',
+    price: 'Neighbor favor',
+    schedule: 'Thursday evening',
+    distance: '0.8 km',
+    status: 'available',
+  },
+  {
+    id: 'lamp-repair',
+    title: 'Help rewiring a table lamp',
+    ownerId: 'eva',
+    category: 'Repair',
+    kind: 'request',
+    description: 'The lamp flickers and probably needs a new plug. I have the replacement part.',
+    location: 'River road 3',
+    price: 'Coffee and cake',
+    schedule: 'This week',
+    distance: '1.4 km',
+    status: 'open',
+  },
+  {
+    id: 'school-run-cover',
+    title: 'School pickup backup',
+    ownerId: 'priya',
+    category: 'Caregiving',
+    kind: 'request',
+    description: 'Need a verified neighbor as backup pickup from the primary school next Tuesday.',
+    location: 'Market lane 17',
+    price: '15 EUR',
+    schedule: 'Tuesday, 15:00',
+    distance: '1.2 km',
+    status: 'open',
+  },
+  {
+    id: 'elder-checkin',
+    title: 'Ten-minute elder check-in',
+    ownerId: 'sara',
+    category: 'Caregiving',
+    kind: 'skill',
+    description: 'Short friendly check-ins for older neighbors: groceries, bin day, or medication reminder.',
+    location: 'Cedar walk 6',
+    price: 'Free',
+    schedule: 'Weekday mornings',
+    distance: '0.5 km',
+    status: 'available',
+  },
+  {
+    id: 'seedling-tray',
+    title: 'Tomato seedling tray',
+    ownerId: 'eva',
+    category: 'Garden',
+    kind: 'lend',
+    description: 'Reusable tray with small pots. Great if you are starting herbs or balcony tomatoes.',
+    location: 'River road 3',
+    price: 'Free',
+    schedule: 'Pickup anytime',
+    distance: '1.4 km',
+    status: 'available',
+  },
+  {
+    id: 'hedge-trimmer',
+    title: 'Cordless hedge trimmer',
+    ownerId: 'john',
+    category: 'Garden',
+    kind: 'rent',
+    description: 'Charged trimmer with safety gloves. Best for small hedges and balcony greenery.',
+    location: 'Maple court 5',
+    price: '5 EUR/h',
+    schedule: 'Saturday',
+    distance: '0.9 km',
+    status: 'available',
+  },
+  {
+    id: 'cargo-bike',
+    title: 'Cargo bike for errands',
+    ownerId: 'noah',
+    category: 'Transport',
+    kind: 'rent',
+    description: 'Front-box bike for groceries, plants, or small flat-pack furniture. Helmet included.',
+    location: 'Willow yard 2',
+    price: '7 EUR/h',
+    schedule: 'Today until 20:00',
+    distance: '0.8 km',
+    status: 'available',
+  },
+  {
+    id: 'airport-ride',
+    title: 'Early airport ride share',
+    ownerId: 'tom',
+    category: 'Transport',
+    kind: 'request',
+    description: 'Looking to share a taxi or ride to the airport with one suitcase.',
+    location: 'Pine avenue 11',
+    price: 'Split fuel',
+    schedule: 'Friday, 05:30',
+    distance: '1.1 km',
+    status: 'open',
+  },
 ]
 
 const seedChats: ChatThread[] = [
@@ -270,6 +519,57 @@ const seedChats: ChatThread[] = [
       { id: 't1', author: 'system', text: 'Important update: New safety tips when meeting neighbors', time: 'Mon' },
     ],
   },
+  {
+    id: 'chat-sara',
+    neighborId: 'sara',
+    listingId: 'folding-table',
+    unread: 1,
+    messages: [
+      { id: 's1', author: 'them', text: 'The folding table is still free this weekend if you need it.', time: '09:42' },
+      { id: 's2', author: 'me', text: 'That would be perfect. Could I pick it up Friday evening?', time: '09:45' },
+      { id: 's3', author: 'them', text: 'Yes, after 18:00 works well.', time: '09:46' },
+    ],
+  },
+  {
+    id: 'chat-tom',
+    neighborId: 'tom',
+    listingId: 'pressure-washer',
+    unread: 0,
+    messages: [
+      { id: 'to1', author: 'them', text: 'I can leave the pressure washer by the side gate at 16:30.', time: 'Yesterday' },
+      { id: 'to2', author: 'me', text: 'Great, I will bring it back before 18:00.', time: 'Yesterday' },
+    ],
+  },
+  {
+    id: 'chat-priya',
+    neighborId: 'priya',
+    listingId: 'school-run-cover',
+    unread: 3,
+    messages: [
+      { id: 'p1', author: 'them', text: 'Could you be my backup pickup next Tuesday?', time: '08:10' },
+      { id: 'p2', author: 'them', text: 'The school office needs the name by tomorrow.', time: '08:12' },
+      { id: 'p3', author: 'them', text: 'Happy to pay the listed amount or return the favor.', time: '08:12' },
+    ],
+  },
+  {
+    id: 'chat-noah',
+    neighborId: 'noah',
+    listingId: 'cargo-bike',
+    unread: 0,
+    messages: [
+      { id: 'n1', author: 'system', text: 'Payment hold released after cargo bike return.', time: 'Tue' },
+      { id: 'n2', author: 'them', text: 'Thanks for bringing it back charged and clean.', time: 'Tue' },
+    ],
+  },
+  {
+    id: 'chat-eva',
+    neighborId: 'eva',
+    listingId: 'lamp-repair',
+    unread: 0,
+    messages: [
+      { id: 'e1', author: 'them', text: 'I found the replacement plug. Any evening works for me.', time: 'Mon' },
+    ],
+  },
 ]
 
 const reviews: Review[] = [
@@ -278,6 +578,36 @@ const reviews: Review[] = [
     fromId: 'linda',
     rating: 5,
     text: 'Amanda was very polite and responsive, lent me her hand drill. Good experience!',
+  },
+  {
+    id: 'r2',
+    fromId: 'john',
+    rating: 5,
+    text: 'Clear pickup instructions and everything was ready on time. Would borrow again.',
+  },
+  {
+    id: 'r3',
+    fromId: 'anna',
+    rating: 5,
+    text: 'Amanda helped me sort out a shelf quickly and left the space tidy.',
+  },
+  {
+    id: 'r4',
+    fromId: 'sara',
+    rating: 4,
+    text: 'Friendly, fast replies, and very careful with shared items.',
+  },
+  {
+    id: 'r5',
+    fromId: 'tom',
+    rating: 5,
+    text: 'Smooth handoff and returned the item exactly when promised.',
+  },
+  {
+    id: 'r6',
+    fromId: 'priya',
+    rating: 5,
+    text: 'A trustworthy neighbor. The chat history made the whole exchange simple.',
   },
 ]
 
@@ -297,10 +627,22 @@ function loadState(): AppState {
   const fallback = { listings: seedListings, favorites: ['dewalt-drill'], chats: seedChats }
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? { ...fallback, ...JSON.parse(raw) } : fallback
+    if (!raw) return fallback
+    const saved = JSON.parse(raw) as Partial<AppState>
+    return {
+      listings: mergeById(saved.listings, seedListings),
+      favorites: saved.favorites ?? fallback.favorites,
+      chats: mergeById(saved.chats, seedChats),
+    }
   } catch {
     return fallback
   }
+}
+
+function mergeById<T extends { id: string }>(saved: T[] | undefined, seeded: T[]) {
+  const savedItems = saved ?? []
+  const savedIds = new Set(savedItems.map((item) => item.id))
+  return [...savedItems, ...seeded.filter((item) => !savedIds.has(item.id))]
 }
 
 function getNeighbor(id: string) {
@@ -435,8 +777,29 @@ function App() {
   function requestListing(listing: Listing) {
     setDetailListing(null)
     if (listing.status === 'booked') {
-      openChat(listing)
-      setNotice('Request already sent - chat opened')
+      setState((current) => ({
+        ...current,
+        listings: current.listings.map((item) =>
+          item.id === listing.id ? { ...item, status: item.kind === 'request' ? 'open' : 'available' } : item,
+        ),
+        chats: current.chats.map((chat) =>
+          chat.neighborId === listing.ownerId && chat.listingId === listing.id
+            ? {
+                ...chat,
+                messages: [
+                  ...chat.messages,
+                  {
+                    id: `cancel-${Date.now()}`,
+                    author: 'system',
+                    text: `Request withdrawn for "${listing.title}". The neighbor can see that this exchange is no longer active.`,
+                    time: nowTime(),
+                  },
+                ],
+              }
+            : chat,
+        ),
+      }))
+      setNotice('Request withdrawn')
       return
     }
     if (isPaidListing(listing)) {
@@ -802,7 +1165,7 @@ function ListingDetailSheet({
           <button onClick={onFavorite}>{favorite ? 'Saved' : 'Save'}</button>
           <button onClick={onChat}>Chat</button>
           <button className="primary-action" onClick={onRequest}>
-            {listing.kind === 'request' ? 'Offer help' : listing.status === 'booked' ? 'Open request' : paid ? 'Continue to pay' : 'Request'}
+            {listing.status === 'booked' ? 'Withdraw request' : listing.kind === 'request' ? 'Offer help' : paid ? 'Continue to pay' : 'Request'}
           </button>
         </div>
       </section>
@@ -827,11 +1190,12 @@ function HomeScreen({
   const offers = listings.filter((listing) => listing.kind !== 'request')
   const availableCount = offers.filter((listing) => listing.status === 'available').length
   const favorCount = listings.filter((listing) => !isPaidListing(listing)).length
+  const neighborCount = new Set(listings.map((listing) => listing.ownerId)).size
 
   return (
     <div className="screen-stack">
       <SearchBox value={query} onChange={setQuery} placeholder="What do you need help with?" />
-      <NeighborhoodPulse availableCount={availableCount} favorCount={favorCount} />
+      <NeighborhoodPulse availableCount={availableCount} favorCount={favorCount} neighborCount={neighborCount} />
       <SectionTitle
         title="Categories"
         onClick={() => {
@@ -872,14 +1236,26 @@ type ListingScreenProps = {
   onBrowseSearch?: () => void
 }
 
-function NeighborhoodPulse({ availableCount, favorCount }: { availableCount: number; favorCount: number }) {
+function NeighborhoodPulse({
+  availableCount,
+  favorCount,
+  neighborCount,
+}: {
+  availableCount: number
+  favorCount: number
+  neighborCount: number
+}) {
   return (
     <section className="pulse-panel" aria-label="Neighborhood activity">
       <div>
-        <span>Elm Quarter is live</span>
-        <strong>{availableCount} shares ready today</strong>
+        <span>Your nearby sharing circle</span>
+        <strong>{availableCount} items and skills ready today</strong>
       </div>
       <dl>
+        <div>
+          <dt>{neighborCount}</dt>
+          <dd>Active neighbors</dd>
+        </div>
         <div>
           <dt>{favorCount}</dt>
           <dd>Free favors</dd>
@@ -1176,10 +1552,16 @@ function ProfileScreen({ listings, favorites }: { listings: Listing[]; favorites
     { title: 'DeWalt hand drill', person: 'John B.', detail: 'Returned yesterday - 5.0 review' },
     { title: 'Folding garden ladder', person: 'Linda T.', detail: 'Booked for Thursday - pickup 18:30' },
     { title: 'Tool bit set', person: 'Anna', detail: 'Pending confirmation - free lend' },
+    { title: 'Stand mixer for baking', person: 'Priya S.', detail: 'Booked Saturday - free lend' },
+    { title: 'Cargo bike for errands', person: 'Noah P.', detail: 'Completed Tuesday - paid hold released' },
+    { title: 'Pressure washer', person: 'Tom R.', detail: 'Reserved tomorrow - 4 EUR/h' },
   ]
   const iBorrowed = [
     { title: 'Electric grill', person: 'Mike', detail: 'Today 19:00 - 21:30 - trade plant care' },
     { title: 'Kids party chair set', person: 'Linda T.', detail: 'This weekend - free' },
+    { title: 'Baby travel cot', person: 'Priya S.', detail: 'Weekend pickup - free' },
+    { title: 'Carpet spot cleaner', person: 'Eva M.', detail: 'Tomorrow - 6 EUR/day' },
+    { title: 'Cordless hedge trimmer', person: 'John B.', detail: 'Saturday - 5 EUR/h' },
   ]
   const panelText: Record<ProfilePanelId, { title: string; rows: Array<{ title: string; person: string; detail: string }> }> = {
     reviews: { title: 'Reviews', rows: reviews.map((review) => ({ title: `${stars(review.rating)} ${getNeighbor(review.fromId).name}`, person: 'Recent feedback', detail: review.text })) },
@@ -1330,7 +1712,19 @@ function ListingCard({
 }) {
   const owner = getNeighbor(listing.ownerId)
   return (
-    <article className={`listing-card ${compact ? 'compact' : ''}`}>
+    <article
+      className={`listing-card ${compact ? 'compact' : ''}`}
+      role="button"
+      tabIndex={0}
+      aria-label={`View details for ${listing.title}`}
+      onClick={onDetails}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onDetails()
+        }
+      }}
+    >
       <div className="listing-top">
         <ListingArt listing={listing} />
         <div className="listing-copy">
@@ -1349,17 +1743,44 @@ function ListingCard({
       <div className="location-row">
         <MapPin size={20} fill="currentColor" />
         <span>{listing.location}</span>
-        <button className={`star-button ${favorite ? 'saved' : ''}`} onClick={onFavorite} aria-label="Toggle favorite">
+        <button
+          className={`star-button ${favorite ? 'saved' : ''}`}
+          onClick={(event) => {
+            event.stopPropagation()
+            onFavorite()
+          }}
+          aria-label="Toggle favorite"
+        >
           <Star size={21} fill="currentColor" />
         </button>
       </div>
       <div className="card-actions">
         <span className={`kind-pill ${listing.kind}`}>{listing.kind}</span>
         <span className="price">{listing.price}</span>
-        <button onClick={onDetails}>Details</button>
-        <button onClick={onChat}>Chat</button>
-        <button className="primary-mini" onClick={onRequest}>
-          {listing.kind === 'request' ? 'Offer help' : listing.status === 'booked' ? 'Requested' : 'Request'}
+        <button
+          onClick={(event) => {
+            event.stopPropagation()
+            onDetails()
+          }}
+        >
+          Details
+        </button>
+        <button
+          onClick={(event) => {
+            event.stopPropagation()
+            onChat()
+          }}
+        >
+          Chat
+        </button>
+        <button
+          className="primary-mini"
+          onClick={(event) => {
+            event.stopPropagation()
+            onRequest()
+          }}
+        >
+          {listing.status === 'booked' ? 'Withdraw' : listing.kind === 'request' ? 'Offer help' : 'Request'}
         </button>
       </div>
     </article>

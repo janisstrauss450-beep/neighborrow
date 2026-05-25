@@ -515,6 +515,7 @@ img {
     border-color 160ms ease,
     box-shadow 160ms ease,
     transform 160ms ease;
+  cursor: pointer;
 }
 
 .listing-card:focus-within,
