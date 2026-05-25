@@ -13,6 +13,7 @@ dist-ssr
 *.local
 verification-*.png
 vite-dev*.log
+output/
 
 # Editor directories and files
 .vscode/*

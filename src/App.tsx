@@ -516,6 +516,8 @@ function App() {
     }
     setState((current) => ({ ...current, listings: [listing, ...current.listings] }))
     setForm(emptyDraft)
+    setQuery('')
+    setActiveCategory('All')
     setTab('home')
     setNotice('Your post is live')
   }
@@ -677,7 +679,7 @@ function CheckoutSheet({
           <ListingArt listing={listing} small />
           <div>
             <strong>{owner.name}</strong>
-            <p>{listing.price} · {listing.schedule}</p>
+            <p>{listing.price} - {listing.schedule}</p>
             <small>{listing.location}</small>
           </div>
         </div>
@@ -930,7 +932,7 @@ function ChatsScreen({
           <div className="thread-details">
             <strong>Exchange details</strong>
             <p>{activeListing.description}</p>
-            <span>{activeListing.location} · {activeListing.distance}</span>
+            <span>{activeListing.location} - {activeListing.distance}</span>
             <span>Status: {activeListing.status === 'booked' ? 'request sent' : activeListing.status}</span>
           </div>
         )}
@@ -995,7 +997,7 @@ function ChatsScreen({
                 <img src={person.avatar} alt="" />
                 <span>
                   <b>{person.name}</b>
-                  <small>{person.address} · {person.rating.toFixed(1)} rating</small>
+                  <small>{person.address} - {person.rating.toFixed(1)} rating</small>
                 </span>
                 <ChevronRight size={20} />
               </button>
@@ -1042,21 +1044,21 @@ function ProfileScreen({ listings, favorites }: { listings: Listing[]; favorites
   type ProfilePanelId = 'reviews' | 'deals' | 'saved' | 'lent' | 'borrowed' | 'posts' | 'safe' | 'frugal'
   const [panel, setPanel] = useState<ProfilePanelId>('lent')
   const borrowedFromMe = [
-    { title: 'DeWalt hand drill', person: 'John B.', detail: 'Returned yesterday · 5.0 review' },
-    { title: 'Folding garden ladder', person: 'Linda T.', detail: 'Booked for Thursday · pickup 18:30' },
-    { title: 'Tool bit set', person: 'Anna', detail: 'Pending confirmation · free lend' },
+    { title: 'DeWalt hand drill', person: 'John B.', detail: 'Returned yesterday - 5.0 review' },
+    { title: 'Folding garden ladder', person: 'Linda T.', detail: 'Booked for Thursday - pickup 18:30' },
+    { title: 'Tool bit set', person: 'Anna', detail: 'Pending confirmation - free lend' },
   ]
   const iBorrowed = [
-    { title: 'Electric grill', person: 'Mike', detail: 'Today 19:00 - 21:30 · trade plant care' },
-    { title: 'Kids party chair set', person: 'Linda T.', detail: 'This weekend · free' },
+    { title: 'Electric grill', person: 'Mike', detail: 'Today 19:00 - 21:30 - trade plant care' },
+    { title: 'Kids party chair set', person: 'Linda T.', detail: 'This weekend - free' },
   ]
   const panelText: Record<ProfilePanelId, { title: string; rows: Array<{ title: string; person: string; detail: string }> }> = {
     reviews: { title: 'Reviews', rows: reviews.map((review) => ({ title: `${stars(review.rating)} ${getNeighbor(review.fromId).name}`, person: 'Recent feedback', detail: review.text })) },
     deals: { title: 'Completed deals', rows: borrowedFromMe.concat(iBorrowed).slice(0, 4) },
-    saved: { title: 'Saved posts', rows: listings.filter((listing) => favorites.includes(listing.id)).map((listing) => ({ title: listing.title, person: getNeighbor(listing.ownerId).name, detail: `${listing.price} · ${listing.schedule}` })) },
+    saved: { title: 'Saved posts', rows: listings.filter((listing) => favorites.includes(listing.id)).map((listing) => ({ title: listing.title, person: getNeighbor(listing.ownerId).name, detail: `${listing.price} - ${listing.schedule}` })) },
     lent: { title: 'Borrowed from me', rows: borrowedFromMe },
     borrowed: { title: 'I borrowed', rows: iBorrowed },
-    posts: { title: 'My active posts', rows: myListings.map((listing) => ({ title: listing.title, person: listing.category, detail: `${listing.price} · ${listing.schedule}` })) },
+    posts: { title: 'My active posts', rows: myListings.map((listing) => ({ title: listing.title, person: listing.category, detail: `${listing.price} - ${listing.schedule}` })) },
     safe: { title: 'Safe exchange badge', rows: [{ title: 'Verified identity', person: 'Safety', detail: 'Profile, location, and neighbor feedback have been checked for safer meetups.' }] },
     frugal: { title: 'Frugal lifestyle badge', rows: [{ title: 'Resource saver', person: 'Community', detail: '15 successful reuse deals helped avoid buying duplicate household items.' }] },
   }
