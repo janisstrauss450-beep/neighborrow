@@ -1101,8 +1101,8 @@ function CheckoutSheet({
   ]
 
   return (
-    <div className="sheet-backdrop" role="dialog" aria-modal="true" aria-label="Payment demo checkout">
-      <section className="checkout-sheet">
+    <div className="sheet-backdrop" role="dialog" aria-modal="true" aria-label="Payment demo checkout" onClick={onClose}>
+      <section className="checkout-sheet" onClick={(event) => event.stopPropagation()}>
         <div className="sheet-head">
           <div>
             <span>Demo checkout</span>
@@ -1173,8 +1173,8 @@ function ListingDetailSheet({
   const paid = isPaidListing(listing)
 
   return (
-    <div className="sheet-backdrop" role="dialog" aria-modal="true" aria-label={`${listing.title} details`}>
-      <section className="checkout-sheet detail-sheet">
+    <div className="sheet-backdrop" role="dialog" aria-modal="true" aria-label={`${listing.title} details`} onClick={onClose}>
+      <section className="checkout-sheet detail-sheet" onClick={(event) => event.stopPropagation()}>
         <div className="sheet-head">
           <div>
             <span>{listing.kind === 'request' ? 'Neighbor request' : paid ? 'Protected exchange' : 'Community share'}</span>
@@ -1472,7 +1472,7 @@ function ChatsScreen({
           </div>
         </div>
         {activeListing && (
-          <button className="thread-listing" onClick={() => setListingDetailsOpen((value) => !value)}>
+          <button className={`thread-listing ${listingDetailsOpen ? 'open' : ''}`} onClick={() => setListingDetailsOpen((value) => !value)}>
             <ListingArt listing={activeListing} small />
             <div>
               <strong>{activeListing.title}</strong>
@@ -1595,9 +1595,9 @@ function ChatsScreen({
 function ProfileScreen({ listings, favorites }: { listings: Listing[]; favorites: string[] }) {
   const amanda = getNeighbor('amanda')
   const myListings = listings.filter((listing) => listing.ownerId === 'amanda')
-  type ProfilePanelId = 'reviews' | 'deals' | 'saved' | 'lent' | 'borrowed' | 'posts' | 'safe' | 'frugal'
+  type ProfilePanelId = 'reviews' | 'deals' | 'saved' | 'active' | 'lent' | 'borrowed' | 'posts' | 'safe' | 'frugal'
   type ProfileRow = { id: string; title: string; person: string; detail: string; date: string; status: string; logs: string[] }
-  const [panel, setPanel] = useState<ProfilePanelId>('lent')
+  const [panel, setPanel] = useState<ProfilePanelId | null>('active')
   const borrowedFromMe: ProfileRow[] = [
     { id: 'lent-drill', title: 'DeWalt hand drill', person: 'John B.', date: '24 May 2026', status: 'Returned', detail: 'Returned yesterday - 5.0 review', logs: ['Request accepted at 09:12', 'Pickup confirmed at Elm street 19', 'Returned clean with all drill bits', 'Review received: 5.0'] },
     { id: 'lent-ladder', title: 'Folding garden ladder', person: 'Linda T.', date: '23 May 2026', status: 'Booked', detail: 'Booked for Thursday - pickup 18:30', logs: ['Linda requested a weekend borrow', 'Pickup window set for 18:30', 'Reminder scheduled for Thursday'] },
@@ -1630,10 +1630,26 @@ function ProfileScreen({ listings, favorites }: { listings: Listing[]; favorites
       logs: [`Saved from ${listing.category}`, `${listing.location} - ${listing.distance}`, listing.description],
     }))
   const dealRows = borrowedFromMe.concat(iBorrowed)
+  const activeRequests: ProfileRow[] = listings
+    .filter((listing) => listing.status === 'booked')
+    .map((listing) => ({
+      id: `active-${listing.id}`,
+      title: listing.title,
+      person: getNeighbor(listing.ownerId).name,
+      date: listing.schedule,
+      status: listing.kind === 'request' ? 'Applied' : 'Requested',
+      detail: `${listing.price} - ${listing.location}`,
+      logs: [
+        listing.kind === 'request' ? 'You offered help on this request' : 'You requested this item or skill',
+        `Current status: ${listing.kind === 'request' ? 'application sent' : 'request sent'}`,
+        'Open the listing card to withdraw or continue the conversation.',
+      ],
+    }))
   const panelText: Record<ProfilePanelId, { title: string; rows: ProfileRow[] }> = {
     reviews: { title: 'Reviews', rows: reviews.map((review) => ({ id: review.id, title: `${stars(review.rating)} ${getNeighbor(review.fromId).name}`, person: 'Recent feedback', date: review.date, status: `${review.rating}.0 rating`, detail: review.text, logs: ['Exchange completed', 'Review submitted by neighbor', review.text] })) },
     deals: { title: 'All exchange logs', rows: dealRows },
     saved: { title: 'Saved posts', rows: savedRows },
+    active: { title: 'Active requests and commitments', rows: activeRequests },
     lent: { title: 'Borrowed from me', rows: borrowedFromMe },
     borrowed: { title: 'I borrowed', rows: iBorrowed },
     posts: { title: 'My active posts', rows: myListings.map((listing) => ({ id: `post-${listing.id}`, title: listing.title, person: listing.category, date: listing.schedule, status: listing.status, detail: `${listing.price} - ${listing.location}`, logs: ['Published by Amanda White', `${listing.distance} from nearby neighbors`, listing.description] })) },
@@ -1642,6 +1658,7 @@ function ProfileScreen({ listings, favorites }: { listings: Listing[]; favorites
   }
   const reviewCount = panelText.reviews.rows.length
   const dealCount = dealRows.length
+  const togglePanel = (nextPanel: ProfilePanelId) => setPanel((current) => (current === nextPanel ? null : nextPanel))
 
   return (
     <div className="profile-screen">
@@ -1653,29 +1670,30 @@ function ProfileScreen({ listings, favorites }: { listings: Listing[]; favorites
             <span>{stars(amanda.rating)}</span> {amanda.rating.toFixed(1)}
           </div>
           <p className="location-pin">{amanda.address}</p>
-          <button className="verified" onClick={() => setPanel('safe')}>Verified</button>
+          <button className="verified" onClick={() => togglePanel('safe')}>Verified</button>
         </div>
       </div>
       <div className="stats-strip">
-        <button className={panel === 'reviews' ? 'active' : ''} onClick={() => setPanel('reviews')}>{reviewCount} Reviews</button>
-        <button className={panel === 'deals' ? 'active' : ''} onClick={() => setPanel('deals')}>{dealCount} Deals</button>
-        <button className={panel === 'saved' ? 'active' : ''} onClick={() => setPanel('saved')}>{favorites.length} Saved</button>
+        <button className={panel === 'reviews' ? 'active' : ''} onClick={() => togglePanel('reviews')}>{reviewCount} Reviews</button>
+        <button className={panel === 'deals' ? 'active' : ''} onClick={() => togglePanel('deals')}>{dealCount} Deals</button>
+        <button className={panel === 'saved' ? 'active' : ''} onClick={() => togglePanel('saved')}>{favorites.length} Saved</button>
       </div>
-      {['reviews', 'deals', 'saved', 'safe', 'frugal'].includes(panel) && <ProfileDetail data={panelText[panel]} />}
+      {panel && ['reviews', 'deals', 'saved', 'safe', 'frugal'].includes(panel) && <ProfileDetail data={panelText[panel]} />}
       <p className="bio">I want to help and share things that others do not have. I value living green and living sparingly.</p>
-      <SectionTitle title="Borrowed and lent" onClick={() => setPanel('lent')} />
+      <SectionTitle title="Requests and history" active={panel === 'active' || panel === 'lent' || panel === 'borrowed' || panel === 'posts'} onClick={() => togglePanel('active')} />
       <div className="history-list">
-        <button className={panel === 'lent' ? 'active' : ''} onClick={() => setPanel('lent')}>Borrowed from me ({borrowedFromMe.length})<ChevronRight size={20} /></button>
-        <button className={panel === 'borrowed' ? 'active' : ''} onClick={() => setPanel('borrowed')}>I borrowed ({iBorrowed.length})<ChevronRight size={20} /></button>
-        <button className={panel === 'posts' ? 'active' : ''} onClick={() => setPanel('posts')}>My active posts ({myListings.length})<ChevronRight size={20} /></button>
+        <button className={panel === 'active' ? 'active' : ''} onClick={() => togglePanel('active')}>Active requests ({activeRequests.length})<ChevronRight size={20} /></button>
+        <button className={panel === 'lent' ? 'active' : ''} onClick={() => togglePanel('lent')}>Borrowed from me ({borrowedFromMe.length})<ChevronRight size={20} /></button>
+        <button className={panel === 'borrowed' ? 'active' : ''} onClick={() => togglePanel('borrowed')}>I borrowed ({iBorrowed.length})<ChevronRight size={20} /></button>
+        <button className={panel === 'posts' ? 'active' : ''} onClick={() => togglePanel('posts')}>My active posts ({myListings.length})<ChevronRight size={20} /></button>
       </div>
-      {['lent', 'borrowed', 'posts'].includes(panel) && <ProfileDetail data={panelText[panel]} />}
-      <SectionTitle title="Evaluations" onClick={() => setPanel('safe')} />
+      {panel && ['active', 'lent', 'borrowed', 'posts'].includes(panel) && <ProfileDetail data={panelText[panel]} />}
+      <SectionTitle title="Evaluations" active={panel === 'safe' || panel === 'frugal'} onClick={() => togglePanel('safe')} />
       <div className="badges">
-        <button className={panel === 'safe' ? 'active' : ''} onClick={() => setPanel('safe')}>Shield Safe exchange</button>
-        <button className={panel === 'frugal' ? 'active' : ''} onClick={() => setPanel('frugal')}>Frugal lifestyle</button>
+        <button className={panel === 'safe' ? 'active' : ''} onClick={() => togglePanel('safe')}>Shield Safe exchange</button>
+        <button className={panel === 'frugal' ? 'active' : ''} onClick={() => togglePanel('frugal')}>Frugal lifestyle</button>
       </div>
-      <button className="review-card" onClick={() => setPanel('reviews')}>
+      <button className="review-card" onClick={() => togglePanel('reviews')}>
         <img src={getNeighbor(reviews[0].fromId).avatar} alt="" />
         <div>
           <strong>{getNeighbor(reviews[0].fromId).name} <span>{stars(reviews[0].rating)}</span></strong>
@@ -1748,9 +1766,9 @@ function SearchBox({ value, onChange, placeholder }: { value: string; onChange: 
   )
 }
 
-function SectionTitle({ title, onClick }: { title: string; onClick?: () => void }) {
+function SectionTitle({ title, onClick, active }: { title: string; onClick?: () => void; active?: boolean }) {
   return (
-    <button className="section-title" type="button" onClick={onClick}>
+    <button className={`section-title ${active ? 'active' : ''}`} type="button" onClick={onClick}>
       <h2>{title}</h2>
       <ChevronRight size={34} strokeWidth={3} />
     </button>
@@ -1860,6 +1878,7 @@ function ListingCard({
       <div className="card-actions">
         <span className={`kind-pill ${listing.kind}`}>{listing.kind}</span>
         <span className="price">{listing.price}</span>
+        {listing.status === 'booked' && <span className="status-pill">{listing.kind === 'request' ? 'Applied' : 'Requested'}</span>}
         <button
           onClick={(event) => {
             event.stopPropagation()

@@ -314,6 +314,11 @@ img {
 .section-title svg {
   color: var(--ink);
   opacity: 0.85;
+  transition: transform 160ms ease;
+}
+
+.section-title.active svg {
+  transform: rotate(90deg);
 }
 
 .category-rail {
@@ -710,7 +715,8 @@ img {
 }
 
 .kind-pill,
-.price {
+.price,
+.status-pill {
   min-height: 28px;
   display: inline-flex;
   align-items: center;
@@ -744,6 +750,11 @@ img {
 .price {
   color: var(--ink);
   background: var(--card-soft);
+}
+
+.status-pill {
+  color: #8d3b2f;
+  background: rgba(239, 106, 86, 0.13);
 }
 
 .card-actions button {
@@ -1095,6 +1106,16 @@ img {
   background: rgba(255, 255, 255, 0.78);
   border: 1px solid rgba(74, 36, 40, 0.05);
   border-radius: 16px;
+}
+
+.thread-listing .chevron,
+.history-list svg {
+  transition: transform 160ms ease;
+}
+
+.thread-listing.open .chevron,
+.history-list button.active svg {
+  transform: rotate(90deg);
 }
 
 .thread-listing span {
@@ -2024,6 +2045,11 @@ img {
   color: #fff;
   background: linear-gradient(180deg, #ff8d32, var(--orange-dark));
   border-color: transparent;
+}
+
+:root[data-theme='dark'] .status-pill {
+  color: #ffb6aa;
+  background: rgba(239, 106, 86, 0.16);
 }
 
 :root[data-theme='dark'] .profile-log {
