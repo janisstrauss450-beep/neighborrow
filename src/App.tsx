@@ -101,6 +101,17 @@ type DraftListing = {
   schedule: string
 }
 
+type ProfileRow = {
+  id: string
+  title: string
+  person: string
+  detail: string
+  date: string
+  status: string
+  logs: string[]
+  listingId?: string
+}
+
 const STORAGE_KEY = 'neighborrow:v1'
 
 const neighbors: Neighbor[] = [
@@ -743,7 +754,8 @@ function App() {
   const filteredListings = useMemo(() => {
     return state.listings.filter((listing) => {
       const matchesCategory = activeCategory === 'All' || listing.category === activeCategory
-      const search = `${listing.title} ${listing.description} ${listing.location} ${listing.category}`.toLowerCase()
+      const owner = getNeighbor(listing.ownerId)
+      const search = `${listing.title} ${listing.description} ${listing.location} ${listing.category} ${listing.kind} ${listing.price} ${listing.status} ${owner.name}`.toLowerCase()
       return matchesCategory && search.includes(query.toLowerCase())
     })
   }, [activeCategory, query, state.listings])
@@ -993,7 +1005,7 @@ function App() {
             />
           )}
 
-          {tab === 'profile' && <ProfileScreen listings={state.listings} favorites={state.favorites} />}
+          {tab === 'profile' && <ProfileScreen listings={state.listings} favorites={state.favorites} onDetails={setDetailListing} />}
         </div>
 
         <BottomNav
@@ -1210,6 +1222,21 @@ function ListingDetailSheet({
           </div>
         </div>
 
+        <div className="handoff-timeline" aria-label="Handoff timeline">
+          <div className={listing.status === 'booked' ? 'done' : ''}>
+            <span>1</span>
+            <p>{listing.status === 'booked' ? 'Request sent' : paid ? 'Choose payment' : 'Send request'}</p>
+          </div>
+          <div>
+            <span>2</span>
+            <p>{paid ? 'Hold protected' : 'Chat confirms'}</p>
+          </div>
+          <div>
+            <span>3</span>
+            <p>Meet and close</p>
+          </div>
+        </div>
+
         <div className="detail-actions">
           <button onClick={onFavorite}>{favorite ? 'Saved' : 'Save'}</button>
           <button onClick={onChat}>Chat</button>
@@ -1245,6 +1272,13 @@ function HomeScreen({
     <div className="screen-stack">
       <SearchBox value={query} onChange={setQuery} placeholder="What do you need help with?" />
       <NeighborhoodPulse availableCount={availableCount} favorCount={favorCount} neighborCount={neighborCount} />
+      <QuickActions
+        onPick={(nextCategory, nextQuery) => {
+          setActiveCategory(nextCategory)
+          setQuery(nextQuery)
+          onBrowseSearch?.()
+        }}
+      />
       <SectionTitle
         title="Categories"
         onClick={() => {
@@ -1283,6 +1317,28 @@ type ListingScreenProps = {
   onChat: (listing: Listing) => void
   onDetails: (listing: Listing) => void
   onBrowseSearch?: () => void
+}
+
+function QuickActions({ onPick }: { onPick: (category: Category | 'All', query: string) => void }) {
+  const lanes: Array<{ title: string; meta: string; category: Category | 'All'; query: string; Icon: LucideIcon }> = [
+    { title: 'Tool now', meta: 'Drills, bits, ladders', category: 'Tools', query: '', Icon: Drill },
+    { title: 'Free favor', meta: 'No payment needed', category: 'All', query: 'Free', Icon: HeartHandshake },
+    { title: 'Paid rental', meta: 'Protected hold', category: 'All', query: 'EUR', Icon: Wallet },
+  ]
+
+  return (
+    <div className="quick-actions" aria-label="Fast search lanes">
+      {lanes.map(({ title, meta, category, query, Icon }) => (
+        <button key={title} onClick={() => onPick(category, query)} aria-label={`Show ${title.toLowerCase()} listings`}>
+          <span>
+            <Icon size={18} />
+          </span>
+          <b>{title}</b>
+          <small>{meta}</small>
+        </button>
+      ))}
+    </div>
+  )
 }
 
 function NeighborhoodPulse({
@@ -1592,11 +1648,18 @@ function ChatsScreen({
   )
 }
 
-function ProfileScreen({ listings, favorites }: { listings: Listing[]; favorites: string[] }) {
+function ProfileScreen({
+  listings,
+  favorites,
+  onDetails,
+}: {
+  listings: Listing[]
+  favorites: string[]
+  onDetails: (listing: Listing) => void
+}) {
   const amanda = getNeighbor('amanda')
   const myListings = listings.filter((listing) => listing.ownerId === 'amanda')
   type ProfilePanelId = 'reviews' | 'deals' | 'saved' | 'active' | 'lent' | 'borrowed' | 'posts' | 'safe' | 'frugal'
-  type ProfileRow = { id: string; title: string; person: string; detail: string; date: string; status: string; logs: string[] }
   const [panel, setPanel] = useState<ProfilePanelId | null>('active')
   const borrowedFromMe: ProfileRow[] = [
     { id: 'lent-drill', title: 'DeWalt hand drill', person: 'John B.', date: '24 May 2026', status: 'Returned', detail: 'Returned yesterday - 5.0 review', logs: ['Request accepted at 09:12', 'Pickup confirmed at Elm street 19', 'Returned clean with all drill bits', 'Review received: 5.0'] },
@@ -1628,6 +1691,7 @@ function ProfileScreen({ listings, favorites }: { listings: Listing[]; favorites
       status: listing.status,
       detail: `${listing.price} - ${listing.schedule}`,
       logs: [`Saved from ${listing.category}`, `${listing.location} - ${listing.distance}`, listing.description],
+      listingId: listing.id,
     }))
   const dealRows = borrowedFromMe.concat(iBorrowed)
   const activeRequests: ProfileRow[] = listings
@@ -1644,6 +1708,7 @@ function ProfileScreen({ listings, favorites }: { listings: Listing[]; favorites
         `Current status: ${listing.kind === 'request' ? 'application sent' : 'request sent'}`,
         'Open the listing card to withdraw or continue the conversation.',
       ],
+      listingId: listing.id,
     }))
   const panelText: Record<ProfilePanelId, { title: string; rows: ProfileRow[] }> = {
     reviews: { title: 'Reviews', rows: reviews.map((review) => ({ id: review.id, title: `${stars(review.rating)} ${getNeighbor(review.fromId).name}`, person: 'Recent feedback', date: review.date, status: `${review.rating}.0 rating`, detail: review.text, logs: ['Exchange completed', 'Review submitted by neighbor', review.text] })) },
@@ -1652,7 +1717,7 @@ function ProfileScreen({ listings, favorites }: { listings: Listing[]; favorites
     active: { title: 'Active requests and commitments', rows: activeRequests },
     lent: { title: 'Borrowed from me', rows: borrowedFromMe },
     borrowed: { title: 'I borrowed', rows: iBorrowed },
-    posts: { title: 'My active posts', rows: myListings.map((listing) => ({ id: `post-${listing.id}`, title: listing.title, person: listing.category, date: listing.schedule, status: listing.status, detail: `${listing.price} - ${listing.location}`, logs: ['Published by Amanda White', `${listing.distance} from nearby neighbors`, listing.description] })) },
+    posts: { title: 'My active posts', rows: myListings.map((listing) => ({ id: `post-${listing.id}`, title: listing.title, person: listing.category, date: listing.schedule, status: listing.status, detail: `${listing.price} - ${listing.location}`, logs: ['Published by Amanda White', `${listing.distance} from nearby neighbors`, listing.description], listingId: listing.id })) },
     safe: { title: 'Safe exchange badge', rows: [{ id: 'safe-identity', title: 'Verified identity', person: 'Safety', date: 'Updated 25 May 2026', status: 'Verified', detail: 'Profile, location, and neighbor feedback have been checked for safer meetups.', logs: ['Phone and profile confirmed', 'Meetup checklist enabled', 'Visible safety badge added to profile'] }] },
     frugal: { title: 'Frugal lifestyle badge', rows: [{ id: 'frugal-resource', title: 'Resource saver', person: 'Community', date: 'May 2026', status: 'Active', detail: `${dealRows.length} successful reuse deals helped avoid buying duplicate household items.`, logs: ['Shared household items instead of buying duplicates', 'Completed free favors and paid holds', 'Badge updates as exchange history grows'] }] },
   }
@@ -1678,7 +1743,7 @@ function ProfileScreen({ listings, favorites }: { listings: Listing[]; favorites
         <button className={panel === 'deals' ? 'active' : ''} onClick={() => togglePanel('deals')}>{dealCount} Deals</button>
         <button className={panel === 'saved' ? 'active' : ''} onClick={() => togglePanel('saved')}>{favorites.length} Saved</button>
       </div>
-      {panel && ['reviews', 'deals', 'saved', 'safe', 'frugal'].includes(panel) && <ProfileDetail data={panelText[panel]} />}
+      {panel && ['reviews', 'deals', 'saved', 'safe', 'frugal'].includes(panel) && <ProfileDetail data={panelText[panel]} listings={listings} onOpenListing={onDetails} />}
       <p className="bio">I want to help and share things that others do not have. I value living green and living sparingly.</p>
       <SectionTitle title="Requests and history" active={panel === 'active' || panel === 'lent' || panel === 'borrowed' || panel === 'posts'} onClick={() => togglePanel('active')} />
       <div className="history-list">
@@ -1687,7 +1752,7 @@ function ProfileScreen({ listings, favorites }: { listings: Listing[]; favorites
         <button className={panel === 'borrowed' ? 'active' : ''} onClick={() => togglePanel('borrowed')}>I borrowed ({iBorrowed.length})<ChevronRight size={20} /></button>
         <button className={panel === 'posts' ? 'active' : ''} onClick={() => togglePanel('posts')}>My active posts ({myListings.length})<ChevronRight size={20} /></button>
       </div>
-      {panel && ['active', 'lent', 'borrowed', 'posts'].includes(panel) && <ProfileDetail data={panelText[panel]} />}
+      {panel && ['active', 'lent', 'borrowed', 'posts'].includes(panel) && <ProfileDetail data={panelText[panel]} listings={listings} onOpenListing={onDetails} />}
       <SectionTitle title="Evaluations" active={panel === 'safe' || panel === 'frugal'} onClick={() => togglePanel('safe')} />
       <div className="badges">
         <button className={panel === 'safe' ? 'active' : ''} onClick={() => togglePanel('safe')}>Shield Safe exchange</button>
@@ -1706,8 +1771,12 @@ function ProfileScreen({ listings, favorites }: { listings: Listing[]; favorites
 
 function ProfileDetail({
   data,
+  listings,
+  onOpenListing,
 }: {
-  data: { title: string; rows: Array<{ id: string; title: string; person: string; detail: string; date: string; status: string; logs: string[] }> }
+  data: { title: string; rows: ProfileRow[] }
+  listings: Listing[]
+  onOpenListing: (listing: Listing) => void
 }) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [showAll, setShowAll] = useState(false)
@@ -1726,22 +1795,49 @@ function ProfileDetail({
         <>
           {visibleRows.map((row) => {
             const expanded = expandedId === row.id
+            const linkedListing = row.listingId ? listings.find((listing) => listing.id === row.listingId) : undefined
             return (
               <button
                 key={row.id}
                 className={`profile-log ${expanded ? 'expanded' : ''}`}
                 onClick={() => setExpandedId(expanded ? null : row.id)}
               >
-                <span>{row.person} - {row.date}</span>
+                <div className="profile-log-top">
+                  <span className="log-icon">{row.status.slice(0, 1)}</span>
+                  <span>{row.person} - {row.date}</span>
+                  <ChevronRight className="log-chevron" size={19} />
+                </div>
                 <b>{row.title}</b>
                 <p>{row.detail}</p>
                 <small>{row.status}</small>
                 {expanded && (
-                  <ol>
-                    {row.logs.map((log) => (
-                      <li key={log}>{log}</li>
-                    ))}
-                  </ol>
+                  <>
+                    <ol>
+                      {row.logs.map((log) => (
+                        <li key={log}>{log}</li>
+                      ))}
+                    </ol>
+                    {linkedListing && (
+                      <span
+                        className="open-listing-link"
+                        role="button"
+                        tabIndex={0}
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          onOpenListing(linkedListing)
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault()
+                            event.stopPropagation()
+                            onOpenListing(linkedListing)
+                          }
+                        }}
+                      >
+                        Open full listing
+                      </span>
+                    )}
+                  </>
                 )}
               </button>
             )
