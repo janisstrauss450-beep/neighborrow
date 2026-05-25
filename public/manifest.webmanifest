@@ -1,0 +1,17 @@
+{
+  "name": "NeighBorrow",
+  "short_name": "NeighBorrow",
+  "description": "Neighborhood lending, renting, and local skill exchange.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fffaf4",
+  "theme_color": "#f26a13",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
