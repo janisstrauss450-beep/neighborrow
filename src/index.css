@@ -1883,6 +1883,8 @@ img {
 .detail-actions .primary-action {
   border-color: transparent;
   color: #fff;
+  background: linear-gradient(180deg, #ff8d32, var(--orange-dark));
+  box-shadow: 0 12px 26px rgba(255, 107, 20, 0.24);
 }
 
 :root[data-theme='dark'] .detail-hero,
