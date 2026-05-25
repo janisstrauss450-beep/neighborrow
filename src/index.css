@@ -119,40 +119,12 @@ img {
   border-color: #090606;
 }
 
-.phone::before {
-  content: '';
-  position: absolute;
-  z-index: 20;
-  top: 15px;
-  left: 50%;
-  width: 124px;
-  height: 34px;
-  border-radius: 999px;
-  background: #070606;
-  transform: translateX(-50%);
-}
-
-.phone::after {
-  content: '12:52';
-  position: absolute;
-  z-index: 20;
-  top: 22px;
-  left: 35px;
-  color: #171313;
-  font-size: 15px;
-  font-weight: 800;
-}
-
-:root[data-theme='dark'] .phone::after {
-  color: #f6e7df;
-}
-
 .app-header {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: calc(var(--safe-top) + 62px) 24px 17px;
+  padding: calc(var(--safe-top) + 22px) 24px 17px;
   border-bottom: 1px solid rgba(74, 36, 40, 0.1);
   background: rgba(255, 253, 250, 0.72);
   backdrop-filter: var(--glass);
@@ -2094,13 +2066,6 @@ img {
     border-radius: 0;
   }
 
-  .phone::before {
-    top: calc(var(--safe-top) + 10px);
-  }
-
-  .phone::after {
-    top: calc(var(--safe-top) + 18px);
-  }
 }
 
 @media (max-width: 370px) {
